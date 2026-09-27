@@ -1,0 +1,22 @@
+# 环境与密钥
+.env
+.venv/
+venv/
+
+# 运行时数据（不入库）
+notes.db
+*.db
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
