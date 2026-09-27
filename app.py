@@ -6,12 +6,13 @@ from flask import Flask, send_from_directory
 from werkzeug.exceptions import HTTPException
 
 import models
+from blueprints.auth import auth_bp
 from config import Config
 from utils.errors import ApiError
 from utils.responses import fail
 
-# 蓝图登记表：各阶段逐步把领域蓝图追加进来。
-BLUEPRINTS = []
+# 蓝图登记表：各阶段逐步把领域蓝图追加进来（前缀声明在蓝图自身）。
+BLUEPRINTS = [auth_bp]
 
 # 常见 HTTP 异常 → 错误码映射（其余按 5xx/4xx 兜底）
 _HTTP_EXCEPTION_CODE = {
@@ -77,6 +78,14 @@ def create_app(config_object=Config):
     @app.get("/")
     def index():
         return send_from_directory("templates", "index.html")
+
+    @app.get("/login")
+    def login_page():
+        return send_from_directory("templates", "login.html")
+
+    @app.get("/register")
+    def register_page():
+        return send_from_directory("templates", "register.html")
 
     return app
 

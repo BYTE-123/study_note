@@ -1,0 +1,179 @@
+/* 个人笔记 · 主页落地页（契约 10.2 主页布局 / 10.3 视觉系统） */
+
+.home-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-7);
+  padding: calc(var(--nav-height) + var(--space-7)) var(--space-6) var(--space-7);
+  /* 背景右置，让咖啡杯与笔记本主体落在右侧，与左侧文案错开 */
+  background-position: right center;
+}
+
+.home-hero__inner {
+  width: 100%;
+}
+
+.home-hero__text {
+  max-width: 520px;
+}
+
+.home-hero__title {
+  margin: 0 0 var(--space-4);
+  font-size: 44px;
+  line-height: 1.25;
+  color: var(--color-heading);
+}
+
+.home-hero__line {
+  display: block;
+}
+
+.home-hero__heart {
+  display: inline-block;
+  margin-left: var(--space-2);
+  font-size: 20px;
+  line-height: 1;
+  vertical-align: super;
+  color: var(--color-primary);
+}
+
+.home-hero__rule {
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-bottom: var(--space-5);
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.home-hero__desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--color-text);
+}
+
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.home-hero__actions .btn {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-6);
+}
+
+/* 次级按钮：白底描边 */
+.home-btn-secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+/* ---------- 四大特性 ---------- */
+
+.home-features {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  /* 限宽：让四列落在左侧留白区，不与背景右侧的咖啡杯 / 笔记本主体重叠 */
+  width: 100%;
+  max-width: 580px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-feature {
+  text-align: center;
+}
+
+.home-feature__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .7);
+  color: var(--color-primary);
+}
+
+.home-feature__icon svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+
+.home-feature__title {
+  margin: 0 0 var(--space-1);
+  font-size: 15px;
+  color: var(--color-heading);
+}
+
+.home-feature__desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1023px) {
+  .home-hero {
+    background-position: right bottom;
+  }
+}
+
+/* 文案区加半透明浅色底，保证背景主体不干扰阅读 */
+@media (max-width: 900px) {
+  .home-hero__text {
+    padding: var(--space-4);
+    border-radius: var(--radius-card);
+    background: rgba(253, 252, 249, .84);
+  }
+}
+
+@media (max-width: 767px) {
+  .home-hero {
+    gap: var(--space-6);
+    min-height: auto;
+    padding-top: calc(var(--nav-height) + var(--space-6));
+    padding-right: var(--space-4);
+    padding-left: var(--space-4);
+    background-position: center;
+  }
+
+  .home-hero__title {
+    font-size: 30px;
+  }
+
+  .home-hero__heart {
+    font-size: 16px;
+  }
+
+  .home-hero__desc {
+    font-size: 14px;
+  }
+
+  /* 两个按钮整行铺满，避免窄屏拥挤 */
+  .home-hero__actions {
+    flex-direction: column;
+  }
+
+  .home-hero__actions .btn {
+    width: 100%;
+  }
+
+  /* 四大特性单列堆叠 */
+  .home-features {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+}

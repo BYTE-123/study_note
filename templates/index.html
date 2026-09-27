@@ -5,43 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>个人笔记 · 记录生活，书写成长</title>
   <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/home.css">
 </head>
-<body class="bg-home">
+<body>
   <header class="app-nav">
     <a class="app-nav__brand" href="/">
       <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
       <span>个人笔记</span>
     </a>
+    <!-- 默认渲染未登录导航；nav.js 会根据登录态替换为「我的文章 / 个人主页 / 关于」 -->
     <nav class="app-nav__links">
-      <a href="/">首页</a>
-      <a href="/about.html">关于</a>
-      <a class="btn btn-primary btn-sm" href="/login.html">登录</a>
+      <a href="/login">登录</a>
+      <a href="/register">注册</a>
+      <a href="/about">关于</a>
     </nav>
   </header>
 
-  <main class="app-main">
-    <section class="card hero">
-      <h1 class="hero__title">遇见美好</h1>
-      <p class="hero__subtitle">记录生活 · 书写成长</p>
-      <p class="hero__desc">
-        个人笔记是一款简洁优雅的在线笔记应用，支持 Markdown 写作、图片插入、
-        AI 润色与一键分享。
-      </p>
-      <div class="hero__actions">
-        <a class="btn btn-primary" href="/register.html">开始记录</a>
-        <a class="btn btn-ghost" href="/about.html">了解更多</a>
+  <main class="home-hero bg-home">
+    <div class="home-hero__inner">
+      <div class="home-hero__text">
+        <h1 class="home-hero__title">
+          <span class="home-hero__line">记录生活 · 书写成长<span class="home-hero__heart" aria-hidden="true">♥</span></span>
+          <span class="home-hero__line">遇见美好</span>
+        </h1>
+        <span class="home-hero__rule" aria-hidden="true"></span>
+        <p class="home-hero__desc">个人笔记是一款简洁优雅的在线笔记应用，帮助你随时随地记录灵感、管理任务、沉淀思考，让每一个想法都被珍藏，让每一天都更有意义。</p>
+        <div class="home-hero__actions">
+          <a class="btn btn-primary" id="start-btn" href="/register"><span aria-hidden="true">✎</span> 开始记录</a>
+          <a class="btn home-btn-secondary" id="more-btn" href="/about"><span aria-hidden="true">▷</span> 了解更多</a>
+        </div>
       </div>
-      <ul class="feature-list">
-        <li>简洁易用</li>
-        <li>云端同步</li>
-        <li>隐私保护</li>
-        <li>灵活分类</li>
-      </ul>
-    </section>
+    </div>
+
+    <ul class="home-features" id="features">
+      <li class="home-feature">
+        <span class="home-feature__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+            <path d="M9 8h6M9 12h6M9 16h3"></path>
+          </svg>
+        </span>
+        <p class="home-feature__title">简洁易用</p>
+        <p class="home-feature__desc">界面清新，专注记录</p>
+      </li>
+      <li class="home-feature">
+        <span class="home-feature__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 18h10a3.5 3.5 0 0 0 .4-6.98A5 5 0 0 0 7.6 9.6 3.7 3.7 0 0 0 7 18z"></path>
+          </svg>
+        </span>
+        <p class="home-feature__title">云端同步</p>
+        <p class="home-feature__desc">账号登录，多端可读</p>
+      </li>
+      <li class="home-feature">
+        <span class="home-feature__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l7 2.8v5.7c0 4.2-2.9 7.5-7 8.5-4.1-1-7-4.3-7-8.5V5.8z"></path>
+            <path d="M9.4 12.1l1.9 1.9 3.4-3.4"></path>
+          </svg>
+        </span>
+        <p class="home-feature__title">隐私保护</p>
+        <p class="home-feature__desc">默认仅自己可见，分享需显式开启</p>
+      </li>
+      <li class="home-feature">
+        <span class="home-feature__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h7.2L20 12.8 12.8 20 4 11.2z"></path>
+            <circle cx="8.2" cy="8.2" r="1.4"></circle>
+          </svg>
+        </span>
+        <p class="home-feature__title">灵活分类</p>
+        <p class="home-feature__desc">标签管理，高效查找</p>
+      </li>
+    </ul>
   </main>
 
   <footer class="app-footer">
     用心记录，让知识更有价值。© 个人笔记
   </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/nav.js"></script>
+  <script src="/static/js/home.js"></script>
 </body>
 </html>

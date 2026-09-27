@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>注册 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/form.css">
+</head>
+<body class="bg-parchment" data-page="register">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links">
+      <a href="/">首页</a>
+      <a href="/about">关于</a>
+    </nav>
+  </header>
+
+  <main class="auth-main">
+    <section class="card auth-card">
+      <h1 class="auth-card__title">创建账号</h1>
+      <p class="auth-card__subtitle">开始记录生活，书写成长</p>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <form id="auth-form" novalidate>
+        <div class="field" data-field="email">
+          <label class="field__label" for="email">邮箱</label>
+          <input class="field__input" id="email" name="email" type="email"
+                 autocomplete="email" placeholder="you@example.com">
+          <p class="field-error" id="email-error"></p>
+        </div>
+
+        <div class="field" data-field="username">
+          <label class="field__label" for="username">用户名</label>
+          <input class="field__input" id="username" name="username" type="text"
+                 autocomplete="username" placeholder="2-20 个字符">
+          <p class="field-error" id="username-error"></p>
+        </div>
+
+        <div class="field" data-field="password">
+          <label class="field__label" for="password">密码</label>
+          <input class="field__input" id="password" name="password" type="password"
+                 autocomplete="new-password" placeholder="至少 6 位">
+          <p class="field-error" id="password-error"></p>
+        </div>
+
+        <div class="field" data-field="confirm_password">
+          <label class="field__label" for="confirm_password">确认密码</label>
+          <input class="field__input" id="confirm_password" name="confirm_password" type="password"
+                 autocomplete="new-password" placeholder="请再次输入密码">
+          <p class="field-error" id="confirm_password-error"></p>
+        </div>
+
+        <button class="btn btn-primary auth-submit" id="auth-submit" type="submit">注册</button>
+      </form>
+
+      <p class="auth-switch">已有账号？<a href="/login">去登录</a></p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+</body>
+</html>

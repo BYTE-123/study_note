@@ -1,0 +1,129 @@
+/* 个人笔记 · 表单页样式（登录页 / 注册页，契约 10.4 输入框与按钮状态） */
+
+.auth-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-height) + var(--space-6)) var(--space-5) var(--space-7);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-6) var(--space-6) var(--space-5);
+}
+
+.auth-card__title {
+  font-size: 24px;
+  margin: 0 0 var(--space-1);
+}
+
+.auth-card__subtitle {
+  margin: 0 0 var(--space-5);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* 表单顶部错误提示：展示接口返回的中文 message */
+.form-error {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: rgba(192, 80, 77, .08);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.form-error[hidden] {
+  display: none;
+}
+
+/* ---------- 字段 ---------- */
+
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  color: var(--color-heading);
+}
+
+.field__input {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.field__input::placeholder {
+  color: var(--color-muted);
+}
+
+/* 聚焦：主色描边 */
+.field__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(168, 137, 79, .18);
+}
+
+/* 错误：红描边 + 下方中文提示 */
+.field.is-error .field__input {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(192, 80, 77, .14);
+}
+
+.field.is-error .field__input:focus {
+  border-color: var(--color-danger);
+}
+
+.field-error {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-danger);
+}
+
+.field-error:empty {
+  display: none;
+}
+
+/* ---------- 按钮与底部链接 ---------- */
+
+.auth-submit {
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--space-2);
+}
+
+.auth-switch {
+  margin: var(--space-5) 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.auth-switch a {
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .auth-main {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .auth-card {
+    padding: var(--space-5);
+  }
+}
