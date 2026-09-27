@@ -1,0 +1,254 @@
+/* 个人笔记 · 工作台与我的文章列表（契约 10.2 布局 / 10.3 视觉系统）
+ * 两页共用：统计卡、面板卡片、笔记列表项、分页。
+ */
+
+/* ---------- 页头 ---------- */
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.page-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ---------- 统计卡（三列） ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  padding: var(--space-6) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.stat-card__value {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 32px;
+  line-height: 1.2;
+  color: var(--color-heading);
+}
+
+.stat-card__label {
+  margin: var(--space-1) 0 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* ---------- 面板卡片 ---------- */
+
+.panel {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.panel + .panel {
+  margin-top: var(--space-5);
+}
+
+.panel__title {
+  margin: 0 0 var(--space-4);
+  font-size: 18px;
+}
+
+/* ---------- 最近文章 / 笔记列表项 ---------- */
+
+.recent-item,
+.note-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.recent-item:last-child,
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.recent-item:hover .recent-item__title,
+.note-item:hover .note-item__title {
+  color: var(--color-primary);
+}
+
+.recent-item__title,
+.note-item__title {
+  font-size: 16px;
+  color: var(--color-heading);
+}
+
+.recent-item__time,
+.note-item__time {
+  flex: none;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* 列表页：每项为多行块（标题 + 摘要 + 标签 + 状态 + 时间） */
+
+.note-item {
+  display: block;
+}
+
+.note-item__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.note-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.note-item__summary {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text);
+}
+
+.note-item__tags {
+  color: var(--color-muted);
+}
+
+/* ---------- 筛选与搜索 ---------- */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.filter-search {
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.filter-tab {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filter-tab.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #FFFFFF;
+}
+
+/* 输入框（与 form.css 一致的最小实现，列表搜索单独用） */
+
+.filter-input {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.filter-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+/* ---------- 分页 ---------- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* author 的 display:flex 会盖过 UA 的 [hidden]，需显式让 hidden 生效 */
+.pagination[hidden] {
+  display: none;
+}
+
+/* ---------- 加载 / 失败态 ---------- */
+
+.state-block {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.state-block .btn {
+  margin-top: var(--space-3);
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1023px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-search {
+    flex-basis: 100%;
+  }
+}

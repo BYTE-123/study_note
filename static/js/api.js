@@ -17,6 +17,68 @@
       .replace(/'/g, '&#39;');
   }
 
+  /**
+   * 时间格式化：ISO 字符串（``2026-06-17T14:33:00``）→ ``2026-06-17 14:33``。
+   * @param {string} value 服务端返回的时间字符串
+   * @returns {string}
+   */
+  function formatDateTime(value) {
+    var text = String(value == null ? '' : value);
+    return text.length >= 16 ? text.slice(0, 16).replace('T', ' ') : text;
+  }
+
+  /** 危险节点：Markdown 渲染结果中一律移除。 */
+  var FORBIDDEN_TAGS = 'script,style,iframe,object,embed,form,link,meta,base';
+
+  /** 危险协议：href/src 命中即移除该属性（http/https/相对路径/mailto 放行）。 */
+  var DANGEROUS_SCHEME = /^(?:javascript|data|vbscript):/i;
+
+  /**
+   * 渲染 Markdown 为安全 HTML（编辑器预览与笔记详情共用）。
+   *
+   * marked v12 返回的是原始 HTML，必须自行清洗：
+   * 1. marked.parse 解析源码；
+   * 2. DOMParser 转为游离文档（其中的 script 不会执行）；
+   * 3. 删除危险节点，移除 on* / srcdoc 属性，过滤 javascript: / data: 协议；
+   * 4. 返回 body.innerHTML（已是安全 HTML 字符串）。
+   *
+   * @param {string} md Markdown 源码
+   * @returns {string} 清洗后的 HTML
+   */
+  function renderMarkdown(md) {
+    var source = String(md == null ? '' : md);
+
+    // marked 未加载时退化为纯文本，宁可少渲染也不引入风险
+    if (typeof global.marked === 'undefined' || !global.marked.parse) {
+      return '<p>' + escapeHtml(source) + '</p>';
+    }
+
+    var doc = new DOMParser().parseFromString(global.marked.parse(source), 'text/html');
+
+    Array.prototype.forEach.call(doc.body.querySelectorAll(FORBIDDEN_TAGS), function (node) {
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
+    });
+
+    Array.prototype.forEach.call(doc.body.querySelectorAll('*'), function (el) {
+      Array.prototype.slice.call(el.attributes).forEach(function (attr) {
+        var name = attr.name.toLowerCase();
+        if (name.indexOf('on') === 0 || name === 'srcdoc') {
+          el.removeAttribute(attr.name);
+        } else if ((name === 'href' || name === 'src')
+          && DANGEROUS_SCHEME.test(String(attr.value || '').trim())) {
+          el.removeAttribute(attr.name);
+        }
+      });
+      if (el.tagName === 'IMG') {
+        el.setAttribute('loading', 'lazy');
+      }
+    });
+
+    return doc.body.innerHTML;
+  }
+
   /** 右下角提示，2.5s 后自动消失。type: 'info' | 'error' */
   function toast(message, type) {
     var el = document.createElement('div');
@@ -76,7 +138,11 @@
     if (!payload || payload.code !== 'OK') {
       var message = (payload && payload.message) || DEFAULT_ERROR;
       toast(message, 'error');
-      throw new Error(message);
+      // 附加错误码与 HTTP 状态，供页面区分 401/404 等分支
+      var apiError = new Error(message);
+      apiError.code = payload && payload.code;
+      apiError.status = response.status;
+      throw apiError;
     }
 
     return payload.data;
@@ -107,4 +173,6 @@
   global.toast = toast;
   global.api = api;
   global.escapeHtml = escapeHtml;
+  global.renderMarkdown = renderMarkdown;
+  global.formatDateTime = formatDateTime;
 })(window);

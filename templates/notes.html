@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我的文章 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/workbench.css">
+</head>
+<body class="bg-parchment" data-page="notes">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links"></nav>
+  </header>
+
+  <main class="app-main">
+    <div class="page-head">
+      <h1 class="page-title">我的文章</h1>
+      <div class="page-actions">
+        <a class="btn btn-primary" href="/editor">新建文章</a>
+      </div>
+    </div>
+
+    <form class="filter-bar" id="filter-form">
+      <div class="filter-tabs" id="status-tabs" role="group" aria-label="状态筛选">
+        <button type="button" class="filter-tab is-active" data-status="all">全部</button>
+        <button type="button" class="filter-tab" data-status="draft">草稿</button>
+        <button type="button" class="filter-tab" data-status="published">已发布</button>
+      </div>
+      <div class="filter-search">
+        <input class="filter-input" id="keyword" name="keyword" type="search"
+               placeholder="搜索标题或正文…" aria-label="搜索关键词">
+      </div>
+      <button class="btn btn-primary" type="submit">搜索</button>
+    </form>
+
+    <section class="panel">
+      <div id="note-list">
+        <p class="state-block">加载中…</p>
+      </div>
+      <nav class="pagination" id="pagination" aria-label="分页" hidden>
+        <button class="btn btn-sm" id="prev-page" type="button">上一页</button>
+        <span id="page-info"></span>
+        <button class="btn btn-sm" id="next-page" type="button">下一页</button>
+      </nav>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/nav.js"></script>
+  <script src="/static/js/notes.js"></script>
+</body>
+</html>

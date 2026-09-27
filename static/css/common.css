@@ -113,6 +113,16 @@ a:hover {
   gap: var(--space-5);
 }
 
+/* 两种登录态共用：未登录「登录 / 注册 / 关于」，已登录「我的文章 / 个人主页 / 关于 / 退出」 */
+.app-nav__links a {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.app-nav__links a:hover {
+  color: var(--color-primary);
+}
+
 .app-main {
   width: 100%;
   max-width: var(--content-max-width);

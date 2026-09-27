@@ -1,0 +1,239 @@
+/* 个人笔记 · 编辑器（契约 10.2 写笔记布局 / 10.3 视觉系统 / 10.4 编辑态细节） */
+
+.editor-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.editor-back {
+  font-size: 15px;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ---------- 编辑卡片 ---------- */
+
+.editor-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.editor-title {
+  display: block;
+  width: 100%;
+  padding: var(--space-5);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  color: var(--color-heading);
+}
+
+.editor-title:focus {
+  outline: none;
+}
+
+.editor-title::placeholder {
+  color: var(--color-muted);
+}
+
+.editor-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.editor-tags__label {
+  flex: none;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.editor-tags__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.editor-tags__input:focus {
+  outline: none;
+}
+
+.editor-tags__input::placeholder {
+  color: var(--color-muted);
+}
+
+/* ---------- 工具栏（浅色条 + 主色悬停描边） ---------- */
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: #FAF7F1;
+  overflow-x: auto;
+}
+
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tool-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.tool-preview {
+  margin-left: auto;
+  padding: 0 var(--space-3);
+}
+
+.tool-preview.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #FFFFFF;
+}
+
+/* ---------- 正文与预览 ---------- */
+
+.editor-content {
+  display: block;
+  width: 100%;
+  min-height: 420px;
+  padding: var(--space-5);
+  border: none;
+  resize: vertical;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.editor-content:focus {
+  outline: none;
+}
+
+.editor-content::placeholder {
+  color: var(--color-muted);
+}
+
+.editor-preview {
+  min-height: 420px;
+  padding: var(--space-5);
+  line-height: 1.75;
+}
+
+/* author 的 display 规则会盖过 UA 的 [hidden]，需显式让 hidden 生效 */
+.editor-content[hidden],
+.editor-preview[hidden] {
+  display: none;
+}
+
+/* 预览排版：标题衬线、引用左边框主色、行内代码浅底 */
+
+.editor-preview h1,
+.editor-preview h2,
+.editor-preview h3,
+.editor-preview h4 {
+  font-family: var(--font-heading);
+  color: var(--color-heading);
+}
+
+.editor-preview blockquote {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  color: var(--color-muted);
+}
+
+.editor-preview code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #F3EFE7;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+.editor-preview pre {
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  background: #F7F4EE;
+  overflow-x: auto;
+}
+
+.editor-preview pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.editor-preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+.editor-preview a {
+  color: var(--color-primary);
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 767px) {
+  .editor-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .editor-actions {
+    width: 100%;
+  }
+
+  .editor-actions .btn {
+    flex: 1;
+  }
+
+  .editor-title {
+    padding: var(--space-4);
+    font-size: 20px;
+  }
+
+  .editor-tags,
+  .editor-toolbar,
+  .editor-content,
+  .editor-preview {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}

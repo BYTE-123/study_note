@@ -7,12 +7,13 @@ from werkzeug.exceptions import HTTPException
 
 import models
 from blueprints.auth import auth_bp
+from blueprints.notes import notes_bp
 from config import Config
 from utils.errors import ApiError
 from utils.responses import fail
 
 # 蓝图登记表：各阶段逐步把领域蓝图追加进来（前缀声明在蓝图自身）。
-BLUEPRINTS = [auth_bp]
+BLUEPRINTS = [auth_bp, notes_bp]
 
 # 常见 HTTP 异常 → 错误码映射（其余按 5xx/4xx 兜底）
 _HTTP_EXCEPTION_CODE = {
@@ -86,6 +87,22 @@ def create_app(config_object=Config):
     @app.get("/register")
     def register_page():
         return send_from_directory("templates", "register.html")
+
+    @app.get("/workbench")
+    def workbench_page():
+        return send_from_directory("templates", "workbench.html")
+
+    @app.get("/notes")
+    def notes_page():
+        return send_from_directory("templates", "notes.html")
+
+    @app.get("/editor")
+    def editor_page():
+        return send_from_directory("templates", "editor.html")
+
+    @app.get("/note")
+    def note_page():
+        return send_from_directory("templates", "note.html")
 
     return app
 

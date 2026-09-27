@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>笔记详情 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/note.css">
+</head>
+<body class="bg-parchment" data-page="note">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links"></nav>
+  </header>
+
+  <main class="app-main">
+    <a class="note-back" href="/notes">← 返回列表</a>
+
+    <article class="card note-card" id="note-card">
+      <div class="note-head">
+        <h1 class="note-title" id="note-title">加载中…</h1>
+        <div class="note-actions" id="note-actions" hidden>
+          <a class="note-action" id="edit-link" href="#">✎ 编辑</a>
+          <button class="note-action note-action--danger" id="delete-btn" type="button">🗑 删除</button>
+        </div>
+      </div>
+      <div class="note-meta" id="note-meta"></div>
+      <div class="note-body" id="note-body"></div>
+    </article>
+
+    <div id="note-error" class="state-block" hidden></div>
+
+    <!-- Phase 4 分享设置占位：本阶段仅渲染空容器 -->
+    <section id="share-panel" class="note-panel-slot"></section>
+    <!-- Phase 5 评论区占位：本阶段仅渲染空容器 -->
+    <section id="comment-panel" class="note-panel-slot"></section>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/vendor/marked.min.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/nav.js"></script>
+  <script src="/static/js/note.js"></script>
+</body>
+</html>
