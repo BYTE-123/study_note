@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人主页 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/profile.css">
+</head>
+<body class="bg-parchment" data-page="profile">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links"></nav>
+  </header>
+
+  <main class="app-main">
+    <div class="page-head">
+      <h1 class="page-title">个人主页</h1>
+      <div class="page-actions">
+        <a class="btn btn-primary" href="/editor">新建文章</a>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <section class="card profile-card" id="profile-card" aria-label="个人信息">
+        <div class="profile-card__head">
+          <h2 class="profile-card__title">个人信息</h2>
+          <button class="btn btn-sm" id="edit-profile-btn" type="button" hidden>编辑资料</button>
+        </div>
+        <div id="profile-content">
+          <p class="state-block">加载中…</p>
+        </div>
+      </section>
+
+      <section class="card profile-card" id="favorites-card" aria-label="我的收藏">
+        <h2 class="profile-card__title">我的收藏</h2>
+        <div id="favorites-content">
+          <p class="state-block">加载中…</p>
+        </div>
+      </section>
+
+      <section class="card profile-card" id="history-card" aria-label="笔记历史">
+        <h2 class="profile-card__title">笔记历史</h2>
+        <div id="history-content">
+          <p class="state-block">加载中…</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/nav.js"></script>
+  <script src="/static/js/profile.js"></script>
+</body>
+</html>

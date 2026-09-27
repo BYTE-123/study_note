@@ -37,12 +37,16 @@
       <div class="note-meta" id="share-meta"></div>
       <div class="note-body" id="share-body-md"></div>
       <div class="share-actions">
-        <button class="btn btn-sm" id="favorite-btn" type="button">☆ 收藏</button>
+        <button class="fav-btn" id="favorite-btn" type="button" aria-pressed="false"
+                title="收藏">
+          <span class="fav-btn__icon" aria-hidden="true">♡</span>
+          <span class="fav-btn__text">收藏</span>
+        </button>
       </div>
     </article>
 
-    <!-- 评论区占位（Phase 5 填充） -->
-    <section id="share-comments" class="note-panel-slot" hidden></section>
+    <!-- 评论区：由 comments-ui.js 渲染（随正文一并加载） -->
+    <section id="share-comments" class="note-panel-slot" aria-label="评论区" hidden></section>
   </main>
 
   <footer class="app-footer">
@@ -51,6 +55,7 @@
 
   <script src="/static/js/vendor/marked.min.js"></script>
   <script src="/static/js/api.js"></script>
+  <script src="/static/js/comments-ui.js"></script>
   <script src="/static/js/share.js"></script>
 </body>
 </html>

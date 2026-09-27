@@ -43,7 +43,7 @@
   }
 
   function renderNav() {
-    fetch('/api/auth/me', { credentials: 'include' })
+    return fetch('/api/auth/me', { credentials: 'include' })
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (payload) {
         currentUser = payload && payload.code === 'OK' ? payload.data : null;
@@ -107,16 +107,49 @@
     // 正文经 renderMarkdown 清洗后再注入，避免脚本执行
     bodyEl.innerHTML = window.renderMarkdown(data.content);
 
-    favoriteBtn.textContent = data.favorited ? '★ 已收藏' : '☆ 收藏';
+    setFavorite(data.favorited);
     favoriteBtn.dataset.noteId = String(data.id);
-
-    // 评论区占位：Phase 5 填充真实列表与输入框
-    commentsEl.hidden = false;
-    commentsEl.innerHTML = '<p class="empty-state">评论区即将开放</p>';
 
     gateEl.hidden = true;
     stateEl.hidden = true;
     contentEl.hidden = false;
+
+    // 评论随正文一并加载（契约 10.4）
+    loadComments(data.id);
+  }
+
+  /* ---------- 评论区（与详情页共用 comments-ui.js） ---------- */
+
+  function commentOptions(noteId) {
+    return {
+      editable: !!currentUser,
+      loginUrl: loginUrl(),
+      canManage: false,
+      canDelete: function (comment) { return !!comment.is_self; },
+      onSubmit: function (content) {
+        return window.api.post('/api/notes/' + encodeURIComponent(noteId) + '/comments',
+          { content: content });
+      },
+      onDelete: function (commentId) {
+        return window.api.del('/api/comments/' + encodeURIComponent(commentId));
+      }
+    };
+  }
+
+  function loadComments(noteId) {
+    window.CommentsUI.renderLoading(commentsEl);
+    window.api.get('/api/notes/' + encodeURIComponent(noteId) + '/comments')
+      .then(function (data) {
+        window.CommentsUI.renderComments(commentsEl, data, commentOptions(noteId));
+      })
+      .catch(function () {
+        commentsEl.hidden = false;
+        commentsEl.textContent = '';
+        var block = document.createElement('p');
+        block.className = 'empty-state';
+        block.textContent = '评论加载失败，请稍后重试';
+        commentsEl.appendChild(block);
+      });
   }
 
   /* ---------- 取正文（可选密码） ---------- */
@@ -179,15 +212,40 @@
     }
   });
 
-  // 未登录点收藏 → 跳登录（Phase 5 接入收藏接口）
+  /* ---------- 收藏按钮（心形：未收藏线性、已收藏填充主色） ---------- */
+
+  function setFavorite(favorited) {
+    favoriteBtn.classList.toggle('is-active', !!favorited);
+    favoriteBtn.setAttribute('aria-pressed', String(!!favorited));
+    favoriteBtn.querySelector('.fav-btn__icon').textContent = favorited ? '♥' : '♡';
+    favoriteBtn.querySelector('.fav-btn__text').textContent = favorited ? '已收藏' : '收藏';
+  }
+
+  // 未登录点收藏 → 跳登录；已登录 → 调用收藏接口并切换图标态
   favoriteBtn.addEventListener('click', function () {
     if (!currentUser) {
       window.location.href = loginUrl();
       return;
     }
-    window.toast('收藏功能即将开放');
+    var noteId = favoriteBtn.dataset.noteId;
+    if (!noteId) {
+      return;
+    }
+    favoriteBtn.disabled = true;
+    window.api.post('/api/notes/' + encodeURIComponent(noteId) + '/favorite')
+      .then(function (data) {
+        setFavorite(data.favorited);
+        window.toast(data.favorited ? '已加入收藏' : '已取消收藏');
+      })
+      .catch(function (error) {
+        if (error && error.status === 401) {
+          window.location.href = loginUrl();
+        }
+      })
+      .then(function () {
+        favoriteBtn.disabled = false;
+      });
   });
 
-  renderNav();
-  load();
+  renderNav().then(load);
 })();

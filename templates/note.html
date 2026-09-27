@@ -29,6 +29,13 @@
       </div>
       <div class="note-meta" id="note-meta"></div>
       <div class="note-body" id="note-body"></div>
+      <div class="note-fav-row">
+        <button class="fav-btn" id="favorite-btn" type="button" aria-pressed="false"
+                title="收藏">
+          <span class="fav-btn__icon" aria-hidden="true">♡</span>
+          <span class="fav-btn__text">收藏</span>
+        </button>
+      </div>
     </article>
 
     <div id="note-error" class="state-block" hidden></div>
@@ -67,8 +74,8 @@
         </div>
       </article>
     </section>
-    <!-- Phase 5 评论区占位：本阶段仅渲染空容器 -->
-    <section id="comment-panel" class="note-panel-slot"></section>
+    <!-- Phase 5 评论区：由 comments-ui.js 渲染（标题 + 开关 + 列表 + 输入框） -->
+    <section id="comment-panel" class="note-panel-slot" aria-label="评论区"></section>
   </main>
 
   <footer class="app-footer">
@@ -78,6 +85,7 @@
   <script src="/static/js/vendor/marked.min.js"></script>
   <script src="/static/js/api.js"></script>
   <script src="/static/js/nav.js"></script>
+  <script src="/static/js/comments-ui.js"></script>
   <script src="/static/js/note.js"></script>
 </body>
 </html>

@@ -28,6 +28,11 @@
   var sharePassword = document.getElementById('share-password');
   var savePasswordBtn = document.getElementById('save-password-btn');
 
+  // 评论区（comments-ui.js 渲染）
+  var commentPanel = document.getElementById('comment-panel');
+  // 收藏按钮
+  var favoriteBtn = document.getElementById('favorite-btn');
+
   var CONFIRM_TEXT = '删除后不可恢复，确定删除这篇笔记吗？';
 
   function statusTag(status) {
@@ -55,8 +60,36 @@
 
     editLink.href = '/editor?id=' + encodeURIComponent(note.id);
     actionsEl.hidden = false;
+    setFavorite(note.favorited);
     renderShare(note);
+    loadComments();
   }
+
+  /* ---------- 收藏按钮（心形：未收藏线性、已收藏填充主色） ---------- */
+
+  function setFavorite(favorited) {
+    favoriteBtn.classList.toggle('is-active', !!favorited);
+    favoriteBtn.setAttribute('aria-pressed', String(!!favorited));
+    favoriteBtn.querySelector('.fav-btn__icon').textContent = favorited ? '♥' : '♡';
+    favoriteBtn.querySelector('.fav-btn__text').textContent = favorited ? '已收藏' : '收藏';
+  }
+
+  favoriteBtn.addEventListener('click', function () {
+    favoriteBtn.disabled = true;
+    window.api.post('/api/notes/' + encodeURIComponent(noteId) + '/favorite')
+      .then(function (data) {
+        setFavorite(data.favorited);
+        window.toast(data.favorited ? '已加入收藏' : '已取消收藏');
+      })
+      .catch(function (error) {
+        if (error && error.status === 401) {
+          gotoLogin();
+        }
+      })
+      .then(function () {
+        favoriteBtn.disabled = false;
+      });
+  });
 
   function showBlock(message, withBack) {
     cardEl.hidden = true;
@@ -203,6 +236,55 @@
         savePasswordBtn.disabled = false;
       });
   });
+
+  /* ---------- 评论区（契约 10.4：加载/空/有评论/提交/超长） ---------- */
+
+  function commentsUrl() {
+    return '/api/notes/' + encodeURIComponent(noteId) + '/comments';
+  }
+
+  // 详情页仅作者可达：可发表、可管理开关、可删除本人评论
+  function commentOptions() {
+    return {
+      editable: true,
+      canManage: true,
+      canDelete: function (comment) { return !!comment.is_self; },
+      onToggle: function (enabled) {
+        return window.api.put(
+          '/api/notes/' + encodeURIComponent(noteId) + '/comment-setting',
+          { enabled: enabled }
+        ).then(function (data) {
+          // 开关变化后重渲染，关闭时输入框切换为「评论已关闭」
+          loadComments();
+          return data;
+        });
+      },
+      onSubmit: function (content) {
+        return window.api.post(commentsUrl(), { content: content });
+      },
+      onDelete: function (commentId) {
+        return window.api.del('/api/comments/' + encodeURIComponent(commentId));
+      }
+    };
+  }
+
+  function loadComments() {
+    window.CommentsUI.renderLoading(commentPanel);
+    window.api.get(commentsUrl()).then(function (data) {
+      window.CommentsUI.renderComments(commentPanel, data, commentOptions());
+    }).catch(function (error) {
+      if (error && error.status === 401) {
+        gotoLogin();
+        return;
+      }
+      commentPanel.hidden = false;
+      commentPanel.textContent = '';
+      var block = document.createElement('p');
+      block.className = 'empty-state';
+      block.textContent = '评论加载失败，请稍后重试';
+      commentPanel.appendChild(block);
+    });
+  }
 
   if (noteId) {
     load();
