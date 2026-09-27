@@ -17,6 +17,17 @@
   var deleteBtn = document.getElementById('delete-btn');
   var errorEl = document.getElementById('note-error');
 
+  // 分享设置面板
+  var shareCard = document.getElementById('share-card');
+  var shareCollapse = document.getElementById('share-collapse');
+  var shareBody = document.getElementById('share-body');
+  var shareSwitch = document.getElementById('share-switch');
+  var shareLinkRow = document.getElementById('share-link-row');
+  var shareLink = document.getElementById('share-link');
+  var copyBtn = document.getElementById('copy-btn');
+  var sharePassword = document.getElementById('share-password');
+  var savePasswordBtn = document.getElementById('save-password-btn');
+
   var CONFIRM_TEXT = '删除后不可恢复，确定删除这篇笔记吗？';
 
   function statusTag(status) {
@@ -44,6 +55,7 @@
 
     editLink.href = '/editor?id=' + encodeURIComponent(note.id);
     actionsEl.hidden = false;
+    renderShare(note);
   }
 
   function showBlock(message, withBack) {
@@ -96,6 +108,101 @@
   });
 
   window.initNav({ withLogout: true });
+
+  /* ---------- 分享设置面板 ---------- */
+
+  var COPY_RESET_MS = 1500;
+
+  function shareUrlFor(token) {
+    return window.location.origin + '/share.html?token=' + encodeURIComponent(token);
+  }
+
+  /** 依据分享状态刷新开关、链接区显隐与链接值。 */
+  function applyShareState(data) {
+    var shared = !!data.is_shared;
+    shareSwitch.checked = shared;
+    shareLinkRow.hidden = !shared;
+    if (shared && data.share_token) {
+      shareLink.value = shareUrlFor(data.share_token);
+    } else {
+      shareLink.value = '';
+    }
+  }
+
+  function renderShare(note) {
+    shareCard.hidden = false;
+    applyShareState({
+      is_shared: note.is_shared,
+      share_token: note.share_token
+    });
+  }
+
+  shareCollapse.addEventListener('click', function () {
+    var collapsed = !shareBody.hidden;
+    shareBody.hidden = collapsed;
+    shareCollapse.textContent = collapsed ? '展开' : '收起';
+    shareCollapse.setAttribute('aria-expanded', String(!collapsed));
+  });
+
+  // 开关切换：开启/关闭分享
+  shareSwitch.addEventListener('change', function () {
+    shareSwitch.disabled = true;
+    window.api.put('/api/notes/' + encodeURIComponent(noteId) + '/share',
+      { enabled: shareSwitch.checked })
+      .then(function (data) {
+        applyShareState(data);
+        window.toast(data.is_shared ? '已开启分享' : '已关闭分享');
+      })
+      .catch(function (error) {
+        // 回滚开关视觉状态
+        shareSwitch.checked = !shareSwitch.checked;
+        if (error && error.status === 401) {
+          gotoLogin();
+        }
+      })
+      .then(function () {
+        shareSwitch.disabled = false;
+      });
+  });
+
+  // 复制链接：成功后按钮变「已复制」1.5s；剪贴板不可用则选中文本
+  copyBtn.addEventListener('click', function () {
+    var text = shareLink.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        var original = copyBtn.textContent;
+        copyBtn.textContent = '已复制';
+        setTimeout(function () {
+          copyBtn.textContent = original;
+        }, COPY_RESET_MS);
+      }).catch(function () {
+        shareLink.select();
+      });
+    } else {
+      shareLink.select();
+    }
+  });
+
+  // 保存密码：空值 → null（移除密码）；非空 → 设置密码并确保分享开启
+  savePasswordBtn.addEventListener('click', function () {
+    var value = sharePassword.value;
+    var payload = { enabled: true, password: value === '' ? null : value };
+    savePasswordBtn.disabled = true;
+    window.api.put('/api/notes/' + encodeURIComponent(noteId) + '/share', payload)
+      .then(function (data) {
+        applyShareState(data);
+        sharePassword.value = '';
+        window.toast(value === '' ? '已移除密码' : '密码已保存');
+      })
+      .catch(function (error) {
+        if (error && error.status === 401) {
+          gotoLogin();
+        }
+      })
+      .then(function () {
+        savePasswordBtn.disabled = false;
+      });
+  });
 
   if (noteId) {
     load();

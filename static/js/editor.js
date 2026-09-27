@@ -15,6 +15,8 @@
   var previewBtn = document.getElementById('preview-toggle');
   var saveDraftBtn = document.getElementById('save-draft');
   var publishBtn = document.getElementById('publish');
+  var imageInput = document.getElementById('image-input');
+  var imageBtn = document.querySelector('.editor-toolbar [data-syntax="image"]');
 
   if (!contentInput) {
     return;
@@ -82,11 +84,65 @@
     }
   }
 
+  /** 在光标处插入纯文本（如 ``![文件名](url)``），插入后光标落在末尾。 */
+  function insertTextAtCaret(text) {
+    var value = contentInput.value;
+    var start = contentInput.selectionStart;
+    var end = contentInput.selectionEnd;
+    contentInput.value = value.slice(0, start) + text + value.slice(end);
+    var caret = start + text.length;
+    setSelection(caret, caret);
+  }
+
+  /* ---------- 图片上传 ---------- */
+
+  /** 选文件 → 上传 → 在光标处插入 ``![文件名](url)``；失败时恢复按钮。 */
+  function uploadImage(file) {
+    // 上传进行中忽略重复触发，避免按钮文案被后一次覆盖而卡在「上传中…」
+    if (imageBtn.disabled) {
+      return;
+    }
+    var originalText = imageBtn.textContent;
+    imageBtn.disabled = true;
+    imageBtn.textContent = '上传中…';
+
+    window.api.upload(file).then(function (data) {
+      insertTextAtCaret('![' + file.name + '](' + data.url + ')');
+    }).catch(function (error) {
+      // 失败文案已由 api.js 统一 toast（含 401「请先登录」与接口 message）
+      if (error && error.status === 401) {
+        gotoLogin();
+      }
+    }).then(function () {
+      imageBtn.disabled = false;
+      imageBtn.textContent = originalText;
+      if (imageInput) {
+        imageInput.value = '';
+      }
+    });
+  }
+
+  if (imageInput && imageBtn) {
+    imageInput.addEventListener('change', function () {
+      if (imageInput.files && imageInput.files[0]) {
+        uploadImage(imageInput.files[0]);
+      }
+    });
+  }
+
   Array.prototype.forEach.call(
     document.querySelectorAll('.editor-toolbar [data-syntax]'),
     function (btn) {
       btn.addEventListener('click', function () {
-        insertSyntax(btn.getAttribute('data-syntax'));
+        var type = btn.getAttribute('data-syntax');
+        if (type === 'image') {
+          // 图片走文件选择 + 上传，不插入占位语法
+          if (imageInput) {
+            imageInput.click();
+          }
+          return;
+        }
+        insertSyntax(type);
       });
     }
   );

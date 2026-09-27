@@ -7,8 +7,10 @@
 """
 import re
 from datetime import datetime
+from uuid import uuid4
 
 from flask import Blueprint, current_app, request
+from werkzeug.security import generate_password_hash
 
 import models
 from utils.auth_guard import login_required
@@ -24,6 +26,7 @@ SUMMARY_LEN = 80
 STATUSES = ("draft", "published")
 RECENT_DEFAULT = 5
 RECENT_MAX = 20
+SHARE_PASSWORD_MIN = 6
 
 # Markdown 标记清理：图片/链接语法先去，再去除行内标记，最后压缩空白
 _MD_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
@@ -252,3 +255,71 @@ def delete(note_id, user_id=None):
     _load_owned_note(note_id, user_id)
     models.execute("DELETE FROM notes WHERE id = ?", (note_id,))
     return ok(None, "已删除")
+
+
+def _share_payload(note):
+    """分享状态载荷：token 仅在开启时返回，绝不泄漏密码哈希。"""
+    shared = bool(note["is_shared"])
+    token = note["share_token"]
+    return {
+        "is_shared": shared,
+        "share_token": token if shared else None,
+        "share_url": ("/share.html?token=" + token) if (shared and token) else None,
+        "has_password": bool(note["share_password_hash"]),
+    }
+
+
+@notes_bp.put("/<int:note_id>/share")
+@login_required
+def set_share(note_id, user_id=None):
+    """分享开关与密码（设计文档 9.4）。
+
+    - 开启：复用已有 token，否则生成 ``uuid4().hex``；``password`` 传非空
+      字符串则校验 ≥6 位并哈希存储，传 ``null``/空串表示移除，字段缺省表示不改动。
+    - 关闭：清空 ``is_shared`` / ``share_token`` / ``share_password_hash``，令旧链接失效。
+    """
+    note = _load_owned_note(note_id, user_id)
+    body = request.get_json(silent=True) or {}
+
+    if not body.get("enabled"):
+        models.execute(
+            "UPDATE notes SET is_shared = 0, share_token = NULL,"
+            " share_password_hash = NULL, updated_at = ? WHERE id = ?",
+            (_now(), note_id),
+        )
+        return ok(_share_payload(models.query_one(
+            "SELECT * FROM notes WHERE id = ?", (note_id,))))
+
+    token = note["share_token"] or uuid4().hex
+    password_hash = note["share_password_hash"]
+    if "password" in body:
+        password = body.get("password")
+        if password:
+            if not isinstance(password, str) or len(password) < SHARE_PASSWORD_MIN:
+                return fail("PARAM_ERROR", "分享密码至少 6 位")
+            password_hash = generate_password_hash(password)
+        else:
+            # 显式 null 或空串 → 移除密码
+            password_hash = None
+
+    models.execute(
+        "UPDATE notes SET is_shared = 1, share_token = ?, share_password_hash = ?,"
+        " updated_at = ? WHERE id = ?",
+        (token, password_hash, _now(), note_id),
+    )
+    return ok(_share_payload(models.query_one(
+        "SELECT * FROM notes WHERE id = ?", (note_id,))))
+
+
+@notes_bp.put("/<int:note_id>/comment-setting")
+@login_required
+def set_comment(note_id, user_id=None):
+    """评论开关（设计文档 9.4）：仅作者可切换 ``comments_enabled``。"""
+    _load_owned_note(note_id, user_id)
+    body = request.get_json(silent=True) or {}
+    enabled = 1 if body.get("enabled") else 0
+    models.execute(
+        "UPDATE notes SET comments_enabled = ?, updated_at = ? WHERE id = ?",
+        (enabled, _now(), note_id),
+    )
+    return ok({"comments_enabled": bool(enabled)})

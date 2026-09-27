@@ -33,8 +33,40 @@
 
     <div id="note-error" class="state-block" hidden></div>
 
-    <!-- Phase 4 分享设置占位：本阶段仅渲染空容器 -->
-    <section id="share-panel" class="note-panel-slot"></section>
+    <!-- 分享设置卡（契约 10.2：开关 + 链接 + 复制 + 密码 + 保存） -->
+    <section id="share-panel" class="note-panel-slot">
+      <article class="card share-card" id="share-card" hidden>
+        <div class="share-head">
+          <h2 class="share-title">分享设置</h2>
+          <button class="btn btn-ghost btn-sm" id="share-collapse" type="button"
+                  aria-expanded="true" aria-controls="share-body">收起</button>
+        </div>
+
+        <div class="share-body" id="share-body">
+          <div class="share-switch-row">
+            <label class="share-switch">
+              <input type="checkbox" id="share-switch" role="switch" aria-label="开启分享">
+              <span class="share-switch__track" aria-hidden="true"></span>
+              <span class="share-switch__text">开启分享</span>
+            </label>
+            <p class="share-hint">开启后，任何人都可通过链接查看这篇笔记。</p>
+          </div>
+
+          <div class="share-link-row" id="share-link-row" hidden>
+            <input class="share-link-input" id="share-link" type="text" readonly
+                   aria-label="分享链接" title="分享链接">
+            <button class="btn btn-sm" id="copy-btn" type="button">复制</button>
+          </div>
+
+          <div class="share-password-row">
+            <input class="share-password-input" id="share-password" type="password"
+                   placeholder="输入新密码（留空移除）" aria-label="分享密码"
+                   autocomplete="new-password">
+            <button class="btn btn-sm" id="save-password-btn" type="button">保存密码</button>
+          </div>
+        </div>
+      </article>
+    </section>
     <!-- Phase 5 评论区占位：本阶段仅渲染空容器 -->
     <section id="comment-panel" class="note-panel-slot"></section>
   </main>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分享的笔记 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/note.css">
+</head>
+<body class="bg-parchment" data-page="share">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links" id="share-nav"></nav>
+  </header>
+
+  <main class="app-main app-main--narrow">
+    <div id="share-state" class="state-block" hidden></div>
+
+    <!-- 密码校验表单：仅在需要密码时显示 -->
+    <section class="card share-gate" id="share-gate" hidden>
+      <h1 class="share-gate__title">需要密码</h1>
+      <p class="share-gate__hint">这篇笔记受密码保护，请输入分享密码查看。</p>
+      <div class="share-gate__row">
+        <input class="share-gate__input" id="share-password-input" type="password"
+               placeholder="请输入分享密码" aria-label="分享密码" autocomplete="off">
+        <button class="btn btn-primary" id="share-view-btn" type="button">查看</button>
+      </div>
+      <p class="share-gate__error" id="share-error" role="alert" hidden></p>
+    </section>
+
+    <!-- 正文卡片：校验通过后显示 -->
+    <article class="card note-card share-note" id="share-content" hidden>
+      <h1 class="note-title" id="share-title"></h1>
+      <div class="note-meta" id="share-meta"></div>
+      <div class="note-body" id="share-body-md"></div>
+      <div class="share-actions">
+        <button class="btn btn-sm" id="favorite-btn" type="button">☆ 收藏</button>
+      </div>
+    </article>
+
+    <!-- 评论区占位（Phase 5 填充） -->
+    <section id="share-comments" class="note-panel-slot" hidden></section>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/vendor/marked.min.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/share.js"></script>
+</body>
+</html>
