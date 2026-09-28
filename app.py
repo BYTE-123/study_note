@@ -6,6 +6,7 @@ from flask import Flask, send_from_directory
 from werkzeug.exceptions import HTTPException
 
 import models
+from blueprints.ai import ai_bp
 from blueprints.auth import auth_bp
 from blueprints.comments import comments_bp
 from blueprints.favorites import favorites_bp
@@ -19,7 +20,7 @@ from utils.responses import fail
 
 # 蓝图登记表：各阶段逐步把领域蓝图追加进来（前缀声明在蓝图自身）。
 BLUEPRINTS = [
-    auth_bp, notes_bp, upload_bp, share_bp, comments_bp, favorites_bp, profile_bp
+    auth_bp, notes_bp, upload_bp, share_bp, comments_bp, favorites_bp, profile_bp, ai_bp
 ]
 
 # 常见 HTTP 异常 → 错误码映射（其余按 5xx/4xx 兜底）

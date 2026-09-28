@@ -208,6 +208,199 @@
   color: var(--color-primary);
 }
 
+/* ---------- AI 润色：自定义右键菜单（契约 10.4 / 10.5） ---------- */
+
+.context-menu {
+  position: fixed;
+  z-index: 900;
+  min-width: 148px;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-modal);
+}
+
+.context-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.context-menu__item:hover {
+  background: rgba(168, 137, 79, .1);
+  color: var(--color-primary);
+}
+
+/* ---------- AI 润色：左右对比弹窗（契约 10.2） ---------- */
+
+.polish-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(60, 45, 30, .35);
+}
+
+.polish-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-modal);
+  animation: polish-fade-in .25s ease;
+}
+
+.polish-dialog:focus {
+  outline: none;
+}
+
+@keyframes polish-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.polish-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.polish-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--color-heading);
+}
+
+.polish-close {
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.polish-close:hover {
+  color: var(--color-primary);
+}
+
+.polish-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.polish-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.polish-col + .polish-col {
+  border-left: 1px solid var(--color-border);
+}
+
+.polish-col__title {
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  background: #FAF7F1;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.polish-col__body {
+  flex: 1;
+  min-height: 200px;
+  max-height: 52vh;
+  padding: var(--space-5);
+  overflow-y: auto;
+  font-size: 15px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.polish-stream {
+  min-height: 1em;
+}
+
+.polish-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.polish-state__text.is-error {
+  color: var(--color-danger);
+}
+
+.polish-state__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: polish-spin .8s linear infinite;
+}
+
+@keyframes polish-spin {
+  to { transform: rotate(360deg); }
+}
+
+.polish-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+/* 弹窗打开时锁住背景滚动 */
+body.is-modal-open {
+  overflow: hidden;
+}
+
+/* author 的 display 规则会盖过 UA 的 [hidden]，需显式让 hidden 生效 */
+.context-menu[hidden],
+.polish-backdrop[hidden],
+.polish-state[hidden],
+.polish-state__spinner[hidden],
+.polish-state .btn[hidden] {
+  display: none;
+}
+
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 767px) {
@@ -235,5 +428,39 @@
   .editor-preview {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
+  }
+
+  /* AI 弹窗：上下堆叠、按钮整行铺满（契约 10.2 响应式） */
+  .polish-backdrop {
+    padding: var(--space-3);
+  }
+
+  .polish-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .polish-col + .polish-col {
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .polish-col__title,
+  .polish-col__body {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .polish-col__body {
+    min-height: 120px;
+    max-height: 28vh;
+  }
+
+  .polish-foot {
+    flex-direction: column;
+    padding: var(--space-4);
+  }
+
+  .polish-foot .btn {
+    width: 100%;
   }
 }

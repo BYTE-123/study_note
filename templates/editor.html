@@ -70,9 +70,49 @@
     用心记录，让知识更有价值。© 个人笔记
   </footer>
 
+  <!-- AI 润色：自定义右键菜单（仅划词时出现，契约 10.4） -->
+  <div id="editor-context-menu" class="context-menu" hidden>
+    <button type="button" class="context-menu__item" data-action="polish">✨ AI 润色</button>
+  </div>
+
+  <!-- AI 润色：左右对比弹窗（契约 10.2 / 10.4 / 10.5） -->
+  <div class="polish-backdrop" id="polish-modal" hidden>
+    <div class="polish-dialog" role="dialog" aria-modal="true"
+         aria-labelledby="polish-title" tabindex="-1">
+      <div class="polish-head">
+        <h2 class="polish-title" id="polish-title">✨ AI 文本润色</h2>
+        <button type="button" class="polish-close" id="polish-close" aria-label="关闭">×</button>
+      </div>
+
+      <div class="polish-grid">
+        <section class="polish-col">
+          <h3 class="polish-col__title">原文</h3>
+          <div class="polish-col__body" id="polish-source"></div>
+        </section>
+        <section class="polish-col">
+          <h3 class="polish-col__title">润色结果</h3>
+          <div class="polish-col__body" id="polish-result-col">
+            <div class="polish-stream" id="polish-result"></div>
+            <div class="polish-state" id="polish-state">
+              <span class="polish-state__spinner" id="polish-spinner" aria-hidden="true"></span>
+              <span class="polish-state__text" id="polish-state-text" role="status">润色中…</span>
+              <button type="button" class="btn btn-sm" id="polish-retry" hidden>重试</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="polish-foot">
+        <button type="button" class="btn" id="polish-cancel">取消</button>
+        <button type="button" class="btn btn-primary" id="polish-apply" disabled>确认替换</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/js/vendor/marked.min.js"></script>
   <script src="/static/js/api.js"></script>
   <script src="/static/js/nav.js"></script>
+  <script src="/static/js/ai-polish.js"></script>
   <script src="/static/js/editor.js"></script>
 </body>
 </html>

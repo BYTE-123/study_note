@@ -170,8 +170,142 @@
     }
   };
 
+  /* ---------- AI 润色流式请求 ---------- */
+
+  /** 解析单帧负载（已去掉 "data: " 前缀）。 */
+  function dispatchFrame(payload, handlers, flags) {
+    if (payload === '[DONE]') {
+      flags.finished = true;
+      // 已经出过错就不再宣告「完成」，否则界面会盖掉错误提示与「重试」
+      if (!flags.failed && handlers.onDone) {
+        handlers.onDone();
+      }
+      return;
+    }
+
+    var data;
+    try {
+      data = JSON.parse(payload);
+    } catch (error) {
+      return; // 脏帧不中断整条流
+    }
+
+    if (data && typeof data.delta === 'string') {
+      if (handlers.onDelta) {
+        handlers.onDelta(data.delta);
+      }
+    } else if (data && data.error) {
+      flags.failed = true;
+      if (handlers.onError) {
+        handlers.onError(data.error);
+      }
+    }
+  }
+
+  /** 逐个读出 SSE 帧并按 ``\n\n`` 边界切分。 */
+  function readFrames(response, handlers) {
+    var reader = response.body.getReader();
+    var decoder = new TextDecoder('utf-8');
+    var buffer = '';
+    var flags = { finished: false, failed: false };
+
+    function handleBlock(block) {
+      block.split('\n').forEach(function (line) {
+        if (line.indexOf('data:') === 0) {
+          dispatchFrame(line.slice(5).trim(), handlers, flags);
+        }
+      });
+    }
+
+    function pump() {
+      return reader.read().then(function (result) {
+        if (result.done) {
+          if (buffer.trim()) {
+            handleBlock(buffer);
+          }
+          // 服务端异常/中断没发 [DONE] 时也要收尾，避免加载态卡住
+          if (!flags.finished && !flags.failed && handlers.onDone) {
+            handlers.onDone();
+          }
+          return;
+        }
+        buffer += decoder.decode(result.value, { stream: true });
+        var blocks = buffer.split('\n\n');
+        buffer = blocks.pop();
+        blocks.forEach(function (block) {
+          if (block.trim()) {
+            handleBlock(block);
+          }
+        });
+        return pump();
+      });
+    }
+
+    return pump();
+  }
+
+  /** 与统一响应结构一致的失败分支：toast 中文 message，401 额外跳登录。 */
+  async function handleStreamFailure(response, handlers) {
+    var payload = null;
+    try {
+      payload = await response.json();
+    } catch (error) {
+      payload = null;
+    }
+    var message = (payload && payload.message) || DEFAULT_ERROR;
+
+    toast(message, 'error');
+    if (response.status === 401) {
+      window.location.href = '/login?next=' + encodeURIComponent(
+        window.location.pathname + window.location.search);
+    }
+    if (handlers.onError) {
+      handlers.onError(message);
+    }
+  }
+
+  /**
+   * 流式润色：POST /api/ai/polish，边收边回调。
+   * @param {string} text 选中的原文
+   * @param {{onDelta?: Function, onError?: Function, onDone?: Function,
+   *          signal?: AbortSignal}} [handlers]
+   * @returns {Promise<void>}
+   */
+  async function streamPolish(text, handlers) {
+    handlers = handlers || {};
+
+    var response;
+    try {
+      response = await fetch('/api/ai/polish', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text }),
+        signal: handlers.signal
+      });
+    } catch (error) {
+      // 用户主动中断（关闭弹窗）不当作错误
+      if (error && error.name === 'AbortError') {
+        return;
+      }
+      toast(NETWORK_ERROR, 'error');
+      if (handlers.onError) {
+        handlers.onError(NETWORK_ERROR);
+      }
+      return;
+    }
+
+    if (!response.ok) {
+      await handleStreamFailure(response, handlers);
+      return;
+    }
+
+    await readFrames(response, handlers);
+  }
+
   global.toast = toast;
   global.api = api;
+  global.streamPolish = streamPolish;
   global.escapeHtml = escapeHtml;
   global.renderMarkdown = renderMarkdown;
   global.formatDateTime = formatDateTime;

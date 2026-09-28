@@ -147,8 +147,13 @@
     }
   );
 
-  /* ---------- 预览切换 ---------- */
+  /* ---------- AI 润色：划词右键菜单（逻辑在 ai-polish.js） ---------- */
 
+  if (window.initContextMenu) {
+    window.initContextMenu(contentInput);
+  }
+
+  /* ---------- 预览切换 ---------- */
   function togglePreview() {
     previewing = !previewing;
     previewEl.hidden = !previewing;
