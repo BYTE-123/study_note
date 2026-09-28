@@ -1,17 +1,17 @@
 /* 个人笔记 · 全站公共样式与设计令牌（契约 10.3） */
 
 :root {
-  /* 颜色角色 */
-  --color-primary: #A8894F;
-  --color-primary-hover: #937743;
+  /* 颜色角色（对比度已按契约 10.5 校正至 AA：正文 8.11:1、次要 4.57:1、链接 4.68:1、主按钮白字 4.80:1） */
+  --color-primary: #8A6E3B;
+  --color-primary-hover: #725B2C;
   --color-heading: #3D3028;
   --color-text: #5C4B3A;
-  --color-muted: #8C7B66;
+  --color-muted: #83715B;
   --color-bg: #FDFCF9;
   --color-surface: #FFFFFF;
   --color-border: #E8E2D6;
   --color-success-bg: #E8F0E4;
-  --color-success-text: #5B7A52;
+  --color-success-text: #547149;
   --color-danger: #C0504D;
 
   /* 字体 */
@@ -123,6 +123,37 @@ a:hover {
   color: var(--color-primary);
 }
 
+/* 当前页选中态（契约 10.2：主色 + 字重） */
+.app-nav__links a.is-active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* 汉堡按钮：仅 <768px 显示，默认隐藏（契约 10.2 响应式） */
+.app-nav__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-heading);
+  cursor: pointer;
+}
+
+.app-nav__toggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.app-nav__toggle-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
 .app-main {
   width: 100%;
   max-width: var(--content-max-width);
@@ -192,7 +223,7 @@ a:hover {
 }
 
 .btn-ghost:hover {
-  background: rgba(168, 137, 79, .08);
+  background: rgba(138, 110, 59, .08);
   border-color: transparent;
 }
 
@@ -207,6 +238,31 @@ a:hover {
   cursor: not-allowed;
 }
 
+/* 按下（契约 10.4） */
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* 加载中：禁用 + 前置转圈（契约 10.4） */
+.btn.is-loading {
+  cursor: progress;
+}
+
+.btn.is-loading::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin .7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ---------- 卡片 ---------- */
 
 .card {
@@ -217,6 +273,66 @@ a:hover {
   padding: var(--space-6);
 }
 
+/* ---------- 关于页（契约 10.2） ---------- */
+
+.about-card + .about-card {
+  margin-top: var(--space-5);
+}
+
+.about-lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--color-text);
+}
+
+.about-title {
+  margin: 0 0 var(--space-4);
+  font-size: 18px;
+}
+
+.about-list {
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: 2;
+}
+
+.about-list strong {
+  color: var(--color-heading);
+}
+
+.about-stack {
+  margin: 0;
+}
+
+.about-stack__row {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.about-stack__row:last-child {
+  border-bottom: none;
+}
+
+.about-stack__row dt {
+  flex: none;
+  width: 4em;
+  color: var(--color-heading);
+}
+
+.about-stack__row dd {
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .about-stack__row {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+}
+
 /* ---------- 状态标签 ---------- */
 
 .tag {
@@ -225,7 +341,7 @@ a:hover {
   border-radius: var(--radius-pill);
   font-size: 13px;
   background: var(--color-border);
-  color: var(--color-muted);
+  color: var(--color-text);
 }
 
 .tag-published {
@@ -337,6 +453,13 @@ a:hover {
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* 功能性加载指示器保留转动（契约 10.5：AI 流式除外） */
+  .polish-state__spinner,
+  .btn.is-loading::before {
+    animation-duration: .8s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -344,12 +467,57 @@ a:hover {
     font-size: 32px;
   }
 
+  /* 导航折叠为汉堡菜单：链接区默认收起，展开后为纵向下拉面板 */
+  .app-nav {
+    padding: 0 var(--space-4);
+  }
+
+  .app-nav__toggle {
+    display: inline-flex;
+  }
+
   .app-nav__links {
-    gap: var(--space-3);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--space-2) 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .app-nav__links.is-open {
+    display: flex;
+  }
+
+  .app-nav__links a,
+  .app-nav__links .btn {
+    width: 100%;
+    min-height: 44px;
+    justify-content: flex-start;
+    padding: var(--space-3) var(--space-5);
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+  }
+
+  .app-nav__links a:hover,
+  .app-nav__links .btn:hover {
+    background: rgba(138, 110, 59, .08);
   }
 
   .app-main {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
+  }
+
+  /* 触控目标 ≥44×44px（契约 10.5） */
+  .btn {
+    min-height: 44px;
   }
 }

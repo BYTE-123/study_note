@@ -18,6 +18,12 @@
   var defaultBtnText = submitBtn ? submitBtn.textContent : '';
   var loadingText = page === 'register' ? '注册中…' : '登录中…';
 
+  /* ---------- 顶部导航（与全站统一，含登录态与汉堡菜单） ---------- */
+
+  if (window.initNav) {
+    window.initNav();
+  }
+
   /* ---------- 取值与提示 ---------- */
 
   function rawValue(name) {
@@ -119,6 +125,7 @@
       return;
     }
     submitBtn.disabled = loading;
+    submitBtn.classList.toggle('is-loading', loading);
     submitBtn.textContent = loading ? loadingText : defaultBtnText;
   }
 

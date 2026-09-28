@@ -160,6 +160,19 @@
   }
 }
 
+/* 触控目标 ≥44×44px（契约 10.5） */
+@media (max-width: 767px) {
+  .fav-btn {
+    min-height: 44px;
+  }
+
+  .note-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 /* ---------- 分享设置卡（契约 10.2 / 10.4 / 10.5） ---------- */
 
 .share-head {

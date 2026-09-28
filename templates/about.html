@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>关于 · 个人笔记</title>
+  <link rel="stylesheet" href="/static/css/common.css">
+</head>
+<body class="bg-parchment" data-page="about">
+  <header class="app-nav">
+    <a class="app-nav__brand" href="/">
+      <img src="/static/img/logo.svg" alt="个人笔记" width="28" height="28">
+      <span>个人笔记</span>
+    </a>
+    <nav class="app-nav__links"></nav>
+  </header>
+
+  <main class="app-main">
+    <div class="page-head">
+      <h1 class="page-title">关于</h1>
+      <div class="page-actions">
+        <a class="btn btn-primary" href="/register">开始记录</a>
+      </div>
+    </div>
+
+    <section class="card about-card">
+      <p class="about-lead">
+        个人笔记是一款简洁优雅的在线笔记应用，帮助你记录灵感、沉淀思考、分享好内容——让每一个想法都被珍藏，让每一天都更有意义。
+      </p>
+    </section>
+
+    <section class="card about-card" aria-label="功能">
+      <h2 class="about-title">功能</h2>
+      <ul class="about-list">
+        <li><strong>主页</strong>：了解产品定位与四大特性，一键开始记录。</li>
+        <li><strong>笔记管理</strong>：新建、保存草稿、发布、编辑、删除，支持状态、关键词与标签筛选。</li>
+        <li><strong>Markdown</strong>：源码编辑与实时预览，工具栏一键插入常用语法，渲染时过滤原始 HTML。</li>
+        <li><strong>分享</strong>：生成分享链接、可选访问密码，随时开启或关闭。</li>
+        <li><strong>评论</strong>：作者可开关评论，访客登录后即可参与讨论。</li>
+        <li><strong>收藏</strong>：收藏自己或他人分享的笔记，随时回看。</li>
+        <li><strong>AI 润色</strong>：编辑器内划词右键，流式润色，一键替换选区。</li>
+      </ul>
+    </section>
+
+    <section class="card about-card" aria-label="技术栈">
+      <h2 class="about-title">技术栈</h2>
+      <dl class="about-stack">
+        <div class="about-stack__row">
+          <dt>前端</dt>
+          <dd>原生 HTML + CSS + JavaScript（零构建，marked.js 本地引入）</dd>
+        </div>
+        <div class="about-stack__row">
+          <dt>后端</dt>
+          <dd>Python 3.10+ / Flask（JSON API + Session 登录态）</dd>
+        </div>
+        <div class="about-stack__row">
+          <dt>数据库</dt>
+          <dd>SQLite（参数化查询，外键约束）</dd>
+        </div>
+        <div class="about-stack__row">
+          <dt>AI</dt>
+          <dd>DeepSeek（OpenAI 兼容接口，SSE 流式转发）</dd>
+        </div>
+      </dl>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    用心记录，让知识更有价值。© 个人笔记
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/nav.js"></script>
+  <script>
+    if (window.initNav) {
+      window.initNav();
+    }
+  </script>
+</body>
+</html>

@@ -46,6 +46,17 @@ python app.py
 - 健康检查：`GET /api/health` → `{"code":"OK","message":"操作成功","data":{"status":"up"}}`
 - 主页：`GET /`
 
+## 生产部署
+
+线上用 gunicorn 托管 Flask、Nginx 反向代理并关闭 SSE 缓冲（否则 AI 润色不会流式返回）：
+
+```bash
+gunicorn -c deploy/gunicorn.conf.py "app:create_app()"
+```
+
+配置样例与完整步骤见 [`deploy/README.md`](deploy/README.md)、[`deploy/nginx.conf.example`](deploy/nginx.conf.example)。
+注意：gunicorn 仅支持 Linux，Windows 上请用 `python app.py` 做本地开发。
+
 ## 测试
 
 ```bash
@@ -66,5 +77,6 @@ static/css        common.css 等样式
 static/js         api.js 等脚本
 static/img        背景素材与图标
 static/uploads/   用户上传图片
+deploy/           gunicorn 与 Nginx 部署配置
 docs/specs/       需求与设计文档
 ```

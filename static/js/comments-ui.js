@@ -185,6 +185,7 @@
 
     /** 提交成功后统一复位按钮与输入框（不阻塞列表更新）。 */
     function settle() {
+      button.classList.remove('is-loading');
       button.textContent = TEXTS.submit;
       refresh();
     }
@@ -198,6 +199,7 @@
         return;
       }
       button.disabled = true;
+      button.classList.add('is-loading');
       button.textContent = TEXTS.submitting;
 
       Promise.resolve(options.onSubmit ? options.onSubmit(content) : null)

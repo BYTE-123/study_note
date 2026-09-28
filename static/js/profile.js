@@ -10,7 +10,7 @@
     loading: '加载中…',
     failed: '加载失败，请稍后重试',
     retry: '重试',
-    emptyFavorites: '还没有收藏任何笔记',
+    emptyFavorites: '还没有收藏，去发现好内容吧',
     emptyHistory: '还没有笔记，点击「新建文章」开始记录吧',
     noBio: '这个人很懒，还没有写简介',
     self: '我',

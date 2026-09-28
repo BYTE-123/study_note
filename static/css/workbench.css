@@ -251,4 +251,9 @@
   .filter-search {
     flex-basis: 100%;
   }
+
+  /* 触控目标 ≥44×44px（契约 10.5） */
+  .filter-tab {
+    min-height: 44px;
+  }
 }

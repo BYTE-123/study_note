@@ -240,7 +240,7 @@
 }
 
 .context-menu__item:hover {
-  background: rgba(168, 137, 79, .1);
+  background: rgba(138, 110, 59, .1);
   color: var(--color-primary);
 }
 
@@ -403,6 +403,13 @@ body.is-modal-open {
 
 /* ---------- 响应式 ---------- */
 
+/* 768–1023px：AI 弹窗左右栏各占一半，字号下调（契约 10.2） */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .polish-col__body {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 767px) {
   .editor-top {
     flex-direction: column;
@@ -462,5 +469,16 @@ body.is-modal-open {
 
   .polish-foot .btn {
     width: 100%;
+  }
+
+  /* 触控目标 ≥44×44px（契约 10.5） */
+  .tool-btn {
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .polish-close {
+    min-width: 44px;
+    min-height: 44px;
   }
 }

@@ -1,6 +1,6 @@
 """图片上传接口测试（设计文档 9.8）。
 
-约定：扩展名白名单 jpg/jpeg/png/gif/webp；大小 ≤ 5MB；
+约定：扩展名白名单 jpg/jpeg/png/gif/webp；文件头须确属图片；大小 ≤ 5MB；
 文件名随机生成（保留扩展名），不信任前端文件名与路径。
 """
 import io
@@ -121,5 +121,21 @@ def test_upload_rejects_non_ascii_executable(client):
     """白名单校验不应被非 ASCII 基名绕过。"""
     register_and_login(client)
     r = upload(client, "恶意.exe", b"MZ\x90\x00binary")
+    assert r.status_code == 400
+    assert r.get_json()["code"] == "FILE_ERROR"
+
+
+def test_upload_rejects_disguised_text_as_png(client):
+    """把纯文本改名成 .png：后缀合法但文件头不是图片，应被拒。"""
+    register_and_login(client)
+    r = upload(client, "笔记.png", b"<script>alert(1)</script> not an image")
+    assert r.status_code == 400
+    assert r.get_json()["code"] == "FILE_ERROR"
+
+
+def test_upload_rejects_script_renamed_to_gif(client):
+    """伪装成 gif 的脚本内容同样应被拒。"""
+    register_and_login(client)
+    r = upload(client, "shell.gif", b"<?php system($_GET['c']); ?>")
     assert r.status_code == 400
     assert r.get_json()["code"] == "FILE_ERROR"

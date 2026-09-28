@@ -1,0 +1,93 @@
+# 个人笔记 · Nginx 反向代理示例
+#
+# 用法：复制到服务器 /etc/nginx/conf.d/notes.conf（或 sites-available/ 后建软链），
+#       把 your-domain.example 与 /srv/notes 改成实际值，然后：
+#         nginx -t && systemctl reload nginx
+#
+# 关键点：/api/ 必须关闭代理缓冲（proxy_buffering off），否则 AI 润色的 SSE
+#         会被 Nginx 攒成一坨，前端看不到「逐字出现」的效果。
+
+server {
+    listen 80;
+    server_name your-domain.example;          # ← 改成你的域名或公网 IP
+
+    # 证书就绪后强制跳转 HTTPS（两处都改完再启用）
+    # return 301 https://$host$request_uri;
+
+    client_max_body_size 6m;                  # 略大于 5MB 上传上限，留出表单开销
+
+    # 静态资源交给 Nginx 直接读盘，不经过 gunicorn
+    location /static/ {
+        alias /srv/notes/static/;             # ← 改成实际部署路径
+        expires 7d;
+        access_log off;
+    }
+
+    # 上传的图片同样由 Nginx 直接服务
+    location /static/uploads/ {
+        alias /srv/notes/static/uploads/;     # ← 改成实际部署路径
+        expires 30d;
+        access_log off;
+    }
+
+    # 接口：转发给 gunicorn，并为 SSE 关闭缓冲
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # —— SSE 必需 ——
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        chunked_transfer_encoding on;
+    }
+
+    # 页面与其余路径
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# ── HTTPS 示例（用 certbot 签发后启用；把上面的 location 段整体复制进来） ──
+#
+# server {
+#     listen 443 ssl http2;
+#     server_name your-domain.example;
+#
+#     ssl_certificate     /etc/letsencrypt/live/your-domain.example/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-domain.example/privkey.pem;
+#     ssl_protocols       TLSv1.2 TLSv1.3;
+#     ssl_ciphers         HIGH:!aNULL:!MD5;
+#
+#     client_max_body_size 6m;
+#     location /static/ { alias /srv/notes/static/; expires 7d; access_log off; }
+#     location /api/ {
+#         proxy_pass http://127.0.0.1:8000;
+#         proxy_http_version 1.1;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#         proxy_buffering off;
+#         proxy_cache off;
+#         proxy_read_timeout 120s;
+#         chunked_transfer_encoding on;
+#     }
+#     location / {
+#         proxy_pass http://127.0.0.1:8000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }

@@ -120,6 +120,10 @@ def create_app(config_object=Config):
     def profile_page():
         return send_from_directory("templates", "profile.html")
 
+    @app.get("/about")
+    def about_page():
+        return send_from_directory("templates", "about.html")
+
     return app
 
 

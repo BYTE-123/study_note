@@ -104,6 +104,7 @@
     }
     var originalText = imageBtn.textContent;
     imageBtn.disabled = true;
+    imageBtn.classList.add('is-loading');
     imageBtn.textContent = '上传中…';
 
     window.api.upload(file).then(function (data) {
@@ -115,6 +116,7 @@
       }
     }).then(function () {
       imageBtn.disabled = false;
+      imageBtn.classList.remove('is-loading');
       imageBtn.textContent = originalText;
       if (imageInput) {
         imageInput.value = '';
@@ -179,11 +181,16 @@
   function setLoading(loading) {
     saveDraftBtn.disabled = loading;
     publishBtn.disabled = loading;
+    if (!loading) {
+      saveDraftBtn.classList.remove('is-loading');
+      publishBtn.classList.remove('is-loading');
+    }
   }
 
   function save(status, btn) {
     var originalText = btn.textContent;
     setLoading(true);
+    btn.classList.add('is-loading');
     btn.textContent = '保存中…';
 
     var payload = {

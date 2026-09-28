@@ -74,7 +74,7 @@
 .field__input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(168, 137, 79, .18);
+  box-shadow: 0 0 0 3px rgba(138, 110, 59, .18);
 }
 
 /* 错误：红描边 + 下方中文提示 */

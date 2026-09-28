@@ -4,6 +4,9 @@ python-dotenv==1.2.3
 requests==2.34.2
 pytest==9.1.1
 
+# 生产部署（Linux；Windows 无法运行 gunicorn，但安装不影响开发）
+gunicorn==26.2.0
+
 # Flask 运行时传递依赖
 Werkzeug==3.1.8
 Jinja2==3.1.6
