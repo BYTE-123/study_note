@@ -1,0 +1,34 @@
+# 个人笔记 · Caddy 反向代理示例
+#
+# 什么时候用这个：服务器上已经装了 Caddy 并占用 80 端口（很多云厂商的
+# Ubuntu 镜像自带它）。此时不要装 Nginx，直接把这份配置换上去即可。
+# deploy/install.sh 会自动识别这种情况并帮你写好，这份文件是手工部署时的参考。
+#
+# 用法：
+#     sudo cp -a /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak   # 先备份
+#     sudo cp deploy/caddy.conf.example /etc/caddy/Caddyfile
+#     sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+#     sudo systemctl reload caddy
+#
+# 还原：
+#     sudo cp -a /etc/caddy/Caddyfile.bak /etc/caddy/Caddyfile && sudo systemctl reload caddy
+
+:80 {
+	# AI 润色走 SSE 流式；flush_interval -1 = 立即刷新，绝不能缓冲，
+	# 否则前端看不到「逐字出现」，会变成等半天一次性蹦出来。
+	reverse_proxy 127.0.0.1:8000 {
+		flush_interval -1
+	}
+}
+
+# ── 有域名后（自动 HTTPS）───────────────────────────────────────────────
+# 把上面的 ":80" 换成你的域名，Caddy 会自动申请并续期 Let's Encrypt 证书，
+# 并自动把 HTTP 跳转到 HTTPS，无需再写别的配置：
+#
+# notes.example.com {
+# 	reverse_proxy 127.0.0.1:8000 {
+# 		flush_interval -1
+# 	}
+# }
+#
+# 前提：域名 A 记录已解析到本机公网 IP，且控制台已放行 80 与 443 端口。

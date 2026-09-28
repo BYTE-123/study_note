@@ -29,6 +29,10 @@ sudo APP_DIR=/opt/notes SERVER_NAME=1.2.3.4 DEEPSEEK_API_KEY=sk-xxx bash deploy/
 > 看不到这一步，是「部署成功但外网打不开」的头号原因。
 > ⚠️ **装了宝塔/1Panel 的机器**：面板自己管理 Nginx，别用本脚本写 Nginx 配置，
 > 改为在面板里新建反向代理站点（同样要关 `/api/` 的缓冲）。
+> ⚠️ **镜像自带 Caddy 的机器**（不少云厂商的 Ubuntu 镜像如此，Caddy 已占用 80 端口）：
+> 脚本会**自动识别并复用 Caddy**，不安装 Nginx；手工配置参考
+> [`caddy.conf.example`](caddy.conf.example)。此时 80 端口已被占用，**不要**再装 Nginx，
+> 否则会因端口冲突起不来。
 
 下面是从零手工部署的完整步骤，需要排查问题或想完全掌控时看。
 

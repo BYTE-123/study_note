@@ -47,17 +47,38 @@ else die "未识别的包管理器（只支持 apt / dnf / yum）"
 fi
 log "包管理器：$PKG"
 
+# ---- 决定反向代理：优先复用已在运行的 Caddy，否则安装 nginx ----
+# 很多云厂商的 Ubuntu 镜像自带 Caddy 并已占用 80 端口，此时再装 nginx 会因端口冲突起不来。
+port80_owner() {
+  ss -tlnpH 2>/dev/null | awk '$4 ~ /:80$/' \
+    | sed -n 's/.*users:(("\([^"]*\)".*/\1/p' | head -1
+}
+WEB="nginx"
+if command -v caddy >/dev/null 2>&1 && systemctl is-active --quiet caddy 2>/dev/null; then
+  WEB="caddy"
+  log "检测到正在运行的 Caddy，复用它做反向代理（不安装 nginx）"
+else
+  OWNER80="$(port80_owner || true)"
+  if [ -n "$OWNER80" ]; then
+    die "80 端口已被「$OWNER80」占用，且它不是运行中的 Caddy。请先停掉它，或参考 deploy/README.md 手工部署。"
+  fi
+  log "80 端口空闲，安装 nginx 做反向代理"
+fi
+
 case "$PKG" in
   apt)
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq
-    apt-get install -y -qq python3 python3-venv python3-pip nginx git curl ca-certificates
+    apt-get install -y -qq python3 python3-venv python3-pip git curl ca-certificates
+    if [ "$WEB" = "nginx" ]; then apt-get install -y -qq nginx; fi
     ;;
   dnf)
-    dnf install -y -q python3 python3-pip nginx git curl ca-certificates
+    dnf install -y -q python3 python3-pip git curl ca-certificates
+    if [ "$WEB" = "nginx" ]; then dnf install -y -q nginx; fi
     ;;
   yum)
-    yum install -y -q python3 python3-pip nginx git curl ca-certificates
+    yum install -y -q python3 python3-pip git curl ca-certificates
+    if [ "$WEB" = "nginx" ]; then yum install -y -q nginx; fi
     ;;
 esac
 
@@ -147,14 +168,36 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-# ---------------------------------------------------------------- 7. Nginx
+# ---------------------------------------------------------------- 7. 反向代理
 SERVER_NAME="${SERVER_NAME:-_}"
-log "写入 Nginx 配置 /etc/nginx/conf.d/${APP_NAME}.conf（server_name=$SERVER_NAME）"
-if [ -e /etc/nginx/sites-enabled/default ]; then
-  log "移除 Debian/Ubuntu 默认站点（否则抢 80 端口）"
-  rm -f /etc/nginx/sites-enabled/default
-fi
-cat > "/etc/nginx/conf.d/${APP_NAME}.conf" <<EOF
+if [ "$WEB" = "caddy" ]; then
+  log "改写 Caddy 配置 /etc/caddy/Caddyfile（原文件会先备份）"
+  CADDY_BAK="/etc/caddy/Caddyfile.orig-$(date +%Y%m%d-%H%M%S)"
+  if [ -f /etc/caddy/Caddyfile ]; then
+    cp -a /etc/caddy/Caddyfile "$CADDY_BAK"
+    log "原配置已备份：$CADDY_BAK"
+  fi
+  cat > /etc/caddy/Caddyfile <<EOF
+# ${PKG_APP_NAME} · 由 deploy/install.sh 生成
+# 原配置备份在 $CADDY_BAK
+#
+# 以后有域名时：把下面第一行的 ":80" 换成你的域名（如 notes.example.com），
+# Caddy 会自动申请并续期 HTTPS 证书，无需其它改动。
+:80 {
+	# AI 润色走 SSE 流式；flush_interval -1 = 立即刷新，绝不能缓冲，
+	# 否则前端看不到逐字出现，会变成一次性蹦出来。
+	reverse_proxy 127.0.0.1:8000 {
+		flush_interval -1
+	}
+}
+EOF
+else
+  log "写入 Nginx 配置 /etc/nginx/conf.d/${APP_NAME}.conf（server_name=$SERVER_NAME）"
+  if [ -e /etc/nginx/sites-enabled/default ]; then
+    log "移除 Debian/Ubuntu 默认站点（否则抢 80 端口）"
+    rm -f /etc/nginx/sites-enabled/default
+  fi
+  cat > "/etc/nginx/conf.d/${APP_NAME}.conf" <<EOF
 server {
     listen 80;
     server_name $SERVER_NAME;
@@ -193,9 +236,12 @@ server {
     }
 }
 EOF
+fi
 
 # ---------------------------------------------------------------- 8. 放行端口
-if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -qi active; then
+# 注意：必须锚定匹配 "^Status: active"，否则 grep -i active 会命中 "inactive" 造成误判
+if command -v ufw >/dev/null 2>&1 \
+   && ufw status 2>/dev/null | head -1 | grep -qE '^Status:[[:space:]]*active[[:space:]]*$'; then
   log "ufw 已启用，放行 80/tcp"
   ufw allow 80/tcp >/dev/null || true
 fi
@@ -209,9 +255,16 @@ fi
 log "启动服务"
 systemctl daemon-reload
 systemctl enable --now "$APP_NAME" >/dev/null
-nginx -t
-systemctl enable --now nginx >/dev/null
-systemctl reload nginx
+if [ "$WEB" = "caddy" ]; then
+  caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1 \
+    || die "Caddy 配置校验失败，请检查 /etc/caddy/Caddyfile"
+  systemctl enable --now caddy >/dev/null
+  systemctl reload caddy
+else
+  nginx -t
+  systemctl enable --now nginx >/dev/null
+  systemctl reload nginx
+fi
 
 # ---------------------------------------------------------------- 10. 自检
 log "自检：等待 gunicorn 就绪"
@@ -223,20 +276,34 @@ done
 [ "$ok" -eq 1 ] || die "gunicorn 未就绪，请看：journalctl -u ${APP_NAME} -n 50 --no-pager"
 
 curl -fsS -m 5 http://127.0.0.1:8000/api/health && echo
+
+log "自检：反向代理（$WEB）"
+if curl -fsS -m 5 http://127.0.0.1/api/health >/dev/null 2>&1; then
+  log "80 端口反代正常"
+else
+  warn "80 端口反代不通，请检查 $WEB 配置与日志"
+fi
+
 IP="$(curl -s -m 5 https://api.ipify.org 2>/dev/null || true)"
 [ -n "$IP" ] || IP="<你的公网IP>"
 
 echo
-log "部署完成"
+log "部署完成（反向代理：$WEB）"
 echo "    访问地址： http://$IP/"
 echo "    服务状态： systemctl status $APP_NAME"
 echo "    服务日志： journalctl -u $APP_NAME -f"
 echo "    改配置后： systemctl restart $APP_NAME"
-echo "    配置文件： $ENV_FILE"
+echo "    应用配置： $ENV_FILE"
+if [ "$WEB" = "caddy" ]; then
+  echo "    反代配置： /etc/caddy/Caddyfile"
+else
+  echo "    反代配置： /etc/nginx/conf.d/${APP_NAME}.conf"
+fi
 echo
 if grep -q '^DEEPSEEK_API_KEY=$' "$ENV_FILE" 2>/dev/null; then
   warn "DEEPSEEK_API_KEY 为空 → AI 润色会提示「AI 服务暂时不可用」。"
   warn "填法： 编辑 $ENV_FILE 补上 Key，然后 systemctl restart $APP_NAME"
 fi
-warn "如果你用的是云服务器（阿里云 / 腾讯云 / 华为云等），还要在控制台的【安全组】里放行 80 端口，"
-warn "否则从外网打不开 —— 这一步在服务器内部看不到，是最常见的「部署好了但访问不了」原因。"
+warn "如果你用的是云服务器，还要在厂商控制台放行 80 端口："
+warn "  腾讯云轻量 / 阿里云轻量 -> 【防火墙】；腾讯云 CVM / 阿里云 ECS -> 【安全组】"
+warn "这一步在服务器内部完全看不到，是「部署成功但外网打不开」的头号原因。"
