@@ -12,6 +12,9 @@ static/uploads/*
 # 运行日志（gunicorn 等）
 logs/
 
+# 测试运行时产物（create_app(TestingConfig) 会建这个目录）
+test_uploads/
+
 # Python 缓存
 __pycache__/
 *.py[cod]
